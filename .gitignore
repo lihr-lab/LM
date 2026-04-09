@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+build/
+*.egg-info/
+.installed.cfg
+
+# Conda / Virtual Env
+envs/
+conda-meta/
+venv/
+ENV/
+
+# Data & Model files (DO NOT UPLOAD REAL LOGS OR MODELS)
+*.json          # ⚠️ 注意：如果你的 JSON 是真实流量日志，请保留这一行！
+*.csv
+*.joblib
+*.pkl
+artifacts/
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
