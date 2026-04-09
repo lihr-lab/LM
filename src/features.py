@@ -217,32 +217,18 @@ def extract_enhanced_features(
 
 
 def _extract_json_part(text: str) -> str:
-    """从文本中提取有效的 JSON 部分（忽略后续的非 JSON 内容）"""
+    """从文本中提取有效的 JSON 部分（忽略后续的非 JSON 内容）。
+    使用 json.JSONDecoder.raw_decode 正确处理字符串内部的括号。"""
     if not text or not text.strip():
         return ""
     text = text.strip()
     if not text.startswith(('{', '[')):
         return ""
-
-    # 匹配对称的括号
-    if text[0] == '{':
-        depth = 0
-        for i, ch in enumerate(text):
-            if ch == '{':
-                depth += 1
-            elif ch == '}':
-                depth -= 1
-                if depth == 0:
-                    return text[:i+1]
-    elif text[0] == '[':
-        depth = 0
-        for i, ch in enumerate(text):
-            if ch == '[':
-                depth += 1
-            elif ch == ']':
-                depth -= 1
-                if depth == 0:
-                    return text[:i+1]
+    try:
+        _, end_idx = json.JSONDecoder().raw_decode(text)
+        return text[:end_idx]
+    except json.JSONDecodeError:
+        pass
     return text
 
 
@@ -623,7 +609,7 @@ class FeatureBuilder:
             http_raw = rec.get("http", "")
             http_decoded = http_raw.replace("\\/", "/").replace("\\r\\n", "\r\n")
             headers = {}
-            body = ""
+            body_raw = ""
             
             if "\r\n\r\n" in http_decoded:
                 header_section, body_section = http_decoded.split("\r\n\r\n", 1)
@@ -632,12 +618,12 @@ class FeatureBuilder:
                     if ": " in line:
                         key, value = line.split(": ", 1)
                         headers[key.lower()] = normalize_value(value)
-                body = normalize_value(body_section.split("\r\n")[0] if body_section else "")
-                if body and ';alertinfo:' in body:
-                       body = body.split(';alertinfo:')[0]
+                body_raw = body_section.split("\r\n")[0] if body_section else ""
+                if body_raw and ';alertinfo:' in body_raw:
+                    body_raw = body_raw.split(';alertinfo:')[0]
             
-            # 提取增强特征
-            json_stats, json_paths_text, body_text, param_keys_text = extract_post_enhanced_features(body, headers)
+            # 提取增强特征（使用原始 body，避免 normalize_value 破坏 JSON 中的数字）
+            json_stats, json_paths_text, body_text, param_keys_text = extract_post_enhanced_features(body_raw, headers)
             
             json_paths_list.append(json_paths_text)
             body_texts_list.append(body_text)
@@ -671,7 +657,7 @@ class FeatureBuilder:
             http_raw = rec.get("http", "")
             http_decoded = http_raw.replace("\\/", "/").replace("\\r\\n", "\r\n")
             headers = {}
-            body = ""
+            body_raw = ""
             
             if "\r\n\r\n" in http_decoded:
                 header_section, body_section = http_decoded.split("\r\n\r\n", 1)
@@ -680,9 +666,12 @@ class FeatureBuilder:
                     if ": " in line:
                         key, value = line.split(": ", 1)
                         headers[key.lower()] = normalize_value(value)
-                body = normalize_value(body_section.split("\r\n")[0] if body_section else "")
+                body_raw = body_section.split("\r\n")[0] if body_section else ""
+                if body_raw and ';alertinfo:' in body_raw:
+                    body_raw = body_raw.split(';alertinfo:')[0]
             
-            json_stats, json_paths_text, body_text, param_keys_text = extract_post_enhanced_features(body, headers)
+            # 使用原始 body（不经过 normalize_value），避免数字被替换为 <NUM> 导致 JSON 解析失败
+            json_stats, json_paths_text, body_text, param_keys_text = extract_post_enhanced_features(body_raw, headers)
             
             json_paths_list.append(json_paths_text)
             body_texts_list.append(body_text)

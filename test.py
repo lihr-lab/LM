@@ -87,7 +87,10 @@ def test_extract_post_enhanced_features():
     # 1. body 应该有内容
     assert len(body) > 0, "Body 不能为空"
 
-    # 2. JSON 统计特征中应该有有效数据
+    # 2. JSON 路径文本不应为空（JSON 数组格式的 body 必须被正确解析并提取路径）
+    assert json_paths_text, "JSON 路径文本不应为空"
+
+    # 3. JSON 统计特征中应该有有效数据
     assert json_stats[0] > 0 or json_stats[1] > 0, "应该提取到 JSON 结构信息"
 
     print("  ✅ PASS")
