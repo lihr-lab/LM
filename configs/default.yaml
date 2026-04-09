@@ -1,0 +1,23 @@
+paths:
+  normal_get: "waf_classified_normal_get_1.json"
+  normal_post: "waf_classified_normal_post_1.json"
+  artifact_dir: "artifacts"
+  model_dir: "artifacts/models"
+  output_dir: "artifacts/output"
+
+feature:
+  tfidf_analyzer: "char_wb"
+  tfidf_ngram_min: 3
+  tfidf_ngram_max: 5
+  tfidf_min_df: 1
+  tfidf_max_features: 5000
+  sequence_window: 20
+
+model:
+  kernel: "rbf"
+  gamma: "scale"
+  nu: 0.01
+  threshold_quantile: 0.01
+
+runtime:
+  random_seed: 42
