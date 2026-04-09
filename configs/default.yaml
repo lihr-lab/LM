@@ -1,6 +1,6 @@
 paths:
-  normal_get: "waf_classified_normal_get_1.json"
-  normal_post: "waf_classified_normal_post_1.json"
+  normal_get: "dataset/waf_classified_normal_get_1.json"
+  normal_post: "dataset/waf_classified_normal_post_1.json"
   artifact_dir: "artifacts"
   model_dir: "artifacts/models"
   output_dir: "artifacts/output"
@@ -16,8 +16,9 @@ feature:
 model:
   kernel: "rbf"
   gamma: "scale"
-  nu: 0.01
-  threshold_quantile: 0.01
+  nu: 0.05
+  train_threshold_percentile: 5
+  threshold_percentile: 5
 
 runtime:
   random_seed: 42
